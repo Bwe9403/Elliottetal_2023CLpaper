@@ -1,5 +1,5 @@
 ##R script for catch summary for plot in paper: Driftnet Fisheries: a sink for Indian Ocean cetaceans##
-#Last update: 5 June 4:30pm
+#Last update: 18 octobre 2023
 
 #set wd and load packages
 setwd("/Users/briannaelliott/Desktop/PhDYr4/Introduction")
@@ -118,7 +118,7 @@ iotcEEZbasemap <- basiciotcmap_withAOC +
 
 ### add catch and Anderson data ### 
 #note: see "IOTC_catch-summary.R" for code for data summary code 
-catchdata_EEZplot <- read_excel("DataforR.xlsx", sheet = 1)
+catchdata_EEZplot <- read_excel("DataforR_updatedOctober.xlsx", sheet = 1)
 catchdata_EEZplot <- catchdata_EEZplot %>%              #need to add Sudan and Kenya twice to match w/ EEZs
   add_row(Country = "Sudan", meancatch=30.85, Andersonestimates = 0) %>% 
   add_row(Country = "Kenya", meancatch=111.89, Andersonestimates = 77) %>% 
