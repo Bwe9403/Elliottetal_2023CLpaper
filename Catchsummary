@@ -5,7 +5,7 @@
 ##2023-04-11######
 
 #set up environment
-setwd('/Users/briannaelliott/Desktop/PhDYear5/CH1')
+setwd('/Users/briannaelliott/Desktop/PhDYear4/Introduction')
 library(tidyverse)
 library(readr)
 library(readxl)
