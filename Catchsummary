@@ -1,10 +1,11 @@
 ##R script for catch summary for plot in paper: Driftnet Fisheries: a sink for Indian Ocean cetaceans##
-##Last update: June 1 2023
+##Last update: 18 october 2023
 ##This uses IOTC nominal data: "Best scientific estimates of nominal catch data for 
 ##IOTC species (used for stock assessment purposes and fully disaggregated by species and gear) WITH THE LAST IOTC UPDATE AS
 ##2023-04-11######
 
 #set up environment
+setwd('/Users/briannaelliott/Desktop/PhDYear5/CH1')
 library(tidyverse)
 library(readr)
 library(readxl)
@@ -12,7 +13,6 @@ library(ggplot2)
 library(dplyr)
 library(countrycode)
 library(writexl)
-setwd('/Users/briannaelliott/Desktop/PhDYr4/Introduction')
 iotcdata<-read_excel("IOTC-DATASETS-2023-04-11-NC-SCI_1950-2021.xlsx", sheet = 2)
 
 #note deleted French text before import into R
@@ -21,27 +21,28 @@ iotc_nominal_data.df <- as.data.frame(iotcdata)
 iotc_nominal_data.df <- iotc_nominal_data.df %>%
   rename(catch = "Catch/Capture(t)") %>%
   rename(year = "Year/An")
-filtergear <- filter(iotc_nominal_data.df, Gear %in% c("Gillnet", "Offshore gillnet")) #note did not look at Sri Lanka's gillnet
+#filtergear <- filter(iotc_nominal_data.df, Gear %in% c("Gillnet", "Offshore gillnet")) #note did not look at Sri Lanka's gillnet
 #attached to handline, only gillnet and offshore gillnet
 
-#calculate mean annual catch 2012-2016 by CPC
-Meancatchsince2012 <- 
-  filter(filtergear, year %in% c(2012:2016)) %>% 
-  group_by(Fleet) %>% 
-  summarise(meancatch = mean(catch)) %>% 
+
+#calculate total annual catch 2012-2016 by CPC
+sumcatch <- 
+  filter(iotc_nominal_data.df, year %in% c(2012:2016), Gear == "Gillnet" | Gear == "Offshore gillnet" | Gear == "Gillnet operated attached") %>% 
+  group_by(Fleet, year) %>% 
+  summarise(sumcatch = sum(catch)) %>% 
+  arrange(desc(sumcatch))
+
+#calculate mean annual catch since 2015-2020
+meancatch <- 
+  sumcatch %>% 
+  group_by(Fleet) %>% summarize(meancatch= mean(sumcatch)) %>% arrange(desc(meancatch)) %>% 
   mutate(across(where(is.numeric), round, 2))
 
-#calculate total annual catch since 2012-2016
-totalcatchsince2012 <- 
-  filter(filtergear, year %in% c(2012:2016)) %>% 
-  group_by(Fleet) %>% 
-  summarise(totalcatch = sum(catch)) %>% 
-  mutate(across(where(is.numeric), round, 2))
-
+GNcatch <- ggplot(meancatch, aes(x=meancatch, y=Fleet)) +
+  geom_bar(width = 1, stat = "identity")
 
 #export tables
 require(openxlsx)
-list_of_datasets_20122016 <- list("Meancatch2012_2016" = Meancatchsince2012, "Total catch 2012 2016" = totalcatchsince2012)
-write.xlsx(list_of_datasets_20122016 , file = "alliotccatchfiles20122016.xlsx")
+write.xlsx(meancatch, file = "meancatch20122016.xlsx")
 
 #Note: Anderson et al. (2020) Table 2 bycatch numbers manually added after exporting code to Excel
